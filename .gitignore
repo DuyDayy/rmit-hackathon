@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Data & models
+data/*/*
+!data/*/.gitkeep
+models/*
+!models/README.md
+*.ckpt
+*.safetensors
+*.pt
+*.onnx
+
+# Vector stores / caches
+chroma/
+*.faiss
+.cache/
+
+# Node
+node_modules/
+.next/
+dist/
+build/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
