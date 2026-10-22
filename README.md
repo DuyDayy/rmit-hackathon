@@ -34,6 +34,18 @@ Watch for: Maya seals and views her genome; the database holds only ciphertext; 
 
 <!-- TODO(team): run through these steps once on a clean machine before submitting. -->
 
+### Run the demo now: simulated TideCloak (no Docker, no Tide account)
+
+```bash
+cd app
+npm install
+npm run dev:sim
+```
+
+Open `http://localhost:3000` and click **Log in** to pick a persona. Each browser tab keeps its own persona, so open one tab per persona. In this mode TideCloak's sign-in, roles, quorum approvals and the Fabric's access checks are simulated behind the same interface the app uses with real TideCloak; a blue banner says so on every page. To start the demo over, stop the server and delete `app/data/`.
+
+We added this mode because the Tide development network was failing on 22 Oct 2026 (realm license setup and Tide account creation returned errors). [docs/tidecloak-integration-plan.md](docs/tidecloak-integration-plan.md) maps each simulated piece to the TideCloak feature it stands in for. The steps below run the same app against real TideCloak.
+
 ### Prerequisites
 
 | Tool | Version | Why |
@@ -106,14 +118,19 @@ There is no seed script: real ciphertext can only be produced in a signed-in bro
 
 ### Demo accounts
 
-| Username | Role in the story | Can do |
-|---|---|---|
-| `maya` | Participant | Seal and view her own genome, set consent preferences |
-| `lee` | Researcher, cancer study | Read only what the quorum has approved |
-| `admin.company` | Company administrator, quorum seat 1 | Run the service; one approval out of three |
-| `admin.acquirer` | New owner's administrator after the sale | Full app admin; no ability to read genomes |
-| `custodian` | Independent data custodian, quorum seat 2 | Approve or reject access changes |
-| `ethics` | Independent ethics board, quorum seat 3 | Approve or reject access changes |
+| Username | Role in the story | Roles it holds | Can do in the demo |
+|---|---|---|---|
+| `maya` | Participant | `_tide_genome.selfencrypt`, `_tide_genome.selfdecrypt` | Seal and open her own genome |
+| `admin.acquirer` | New owner's administrator after the sale | App admin (`manage-users`, `view-users`, `query-users`, `view-realm`); no genome role, no quorum seat | Try "Export all" (denied) and request read access for itself (pending) |
+| `admin.company` | Company administrator; after the sale the acquirer controls it too | Quorum seat 1 (`tide-realm-admin`) | Approve or reject on the Quorum page: one of the two approvals needed |
+| `custodian` | Independent data custodian | Quorum seat 2 | Approve or reject access changes |
+| `ethics` | Independent ethics board | Quorum seat 3 | Approve or reject access changes |
+| `lee` | Researcher, cancer study | Default roles only | Not in the demo (roadmap: read only what the quorum approves) |
+
+Signing in:
+
+- **Simulated mode:** click **Log in** and pick the persona. No password.
+- **Real TideCloak:** each persona links its own Tide account during enrollment (`npm run setup` opens the link). The app and TideCloak store no password.
 
 All people, genomes and organisations in this repository are synthetic.
 
@@ -253,7 +270,7 @@ sequenceDiagram
     X->>F: Decrypt all genomes
     F-->>X: Denied, no approved read access
     X->>T: Grant myself read access
-    T-->>X: Change request pending, 1 of 2 approvals
+    T-->>X: Change request pending, 0 of 2 approvals
     T->>Q: Ask custodian and ethics board
     Q-->>T: Rejected
     Note over X: Owning the company does not mean owning the keys
@@ -319,13 +336,15 @@ Video: [`demo.mp4`](./demo.mp4) (two minutes).
 | Step | Who | Action | Expected result |
 |---|---|---|---|
 | 1 | Maya | Signs in and opens "My genome" | Her synthetic genome is decrypted in her browser |
-| 2 | Maya | Sets consent: cancer research on, commercial AI training off | Preference saved |
+| 2 | Maya | Sets consent: cancer research on, commercial AI training off | Not in the prototype yet (planned) |
 | 3 | Anyone | Opens the database file | Genome field is ciphertext only |
 | 4 | `admin.acquirer` | Clicks "Export all genomes" | **Denied** by the Fabric |
-| 5 | `admin.acquirer` | Tries to grant itself read access | **Pending**: 1 of 2 approvals |
-| 6 | `custodian`, `ethics` | Review the request | Rejected, so the acquirer still cannot read |
+| 5 | `admin.acquirer` | Tries to grant itself read access | **Pending**: 0 of 2 approvals |
+| 6 | `admin.company`, `custodian`, `ethics` | Review the request. The acquirer now also controls the company's seat and approves (1 of 2); the custodian and ethics board reject | **Rejected**, so the acquirer still cannot read |
 
-The key interaction for judges is **steps 4 and 5**: full ownership of the company and its servers still does not translate into the power to read anyone's DNA.
+The key interaction for judges is **steps 4 to 6**: full ownership of the company, its servers and its quorum seat still does not translate into the power to read anyone's DNA.
+
+In simulated mode (`npm run dev:sim`) sign-in is a persona picker and step 6 happens on the app's **Quorum** page; with real TideCloak the quorum signs its decisions in the Tide console.
 
 ## Data model
 
@@ -363,18 +382,18 @@ Consent flags are stored in plaintext in the prototype so the app can display th
 
 <!-- TODO(team): update this table to match exactly what the demo shows. Judges compare it with the video. -->
 
-| Capability | Status |
-|---|---|
-| Realm `unsellable` with six personas; genome roles held only by `maya` | Implemented (setup script) |
-| Sign-in through TideCloak for the five demo personas (`lee` is created but not used in the demo) | In progress |
-| Genome sealed with Hermetic E2EE; database stores ciphertext only | In progress |
-| Participant views her own genome | In progress |
-| Acquirer "Export all" denied | In progress |
-| Acquirer self-grant of read access pending quorum | In progress |
-| Three-seat quorum (company, custodian, ethics board) | In progress |
-| Researcher access approved by quorum | Planned |
-| Consent preferences enforced cryptographically | Planned |
-| AI research agent limited to approved scope | Planned |
+| Capability | Simulated mode (`npm run dev:sim`) | Real TideCloak |
+|---|---|---|
+| Realm `unsellable` with six personas; genome roles held only by `maya` | Same personas and roles | Setup script creates them; enrolling Tide accounts failed on 22 Oct (Tide dev network errors) |
+| Sign-in for the five demo personas (`lee` exists but is not in the demo) | Implemented (persona picker) | Wired through `@tidecloak/nextjs`, not demonstrated |
+| Genome sealed in the browser; database stores ciphertext only | Implemented (simulated Fabric: AES-GCM, role-gated, owner-bound) | Wired to `doEncrypt` with tag `genome`, not demonstrated |
+| Participant views her own genome | Implemented | Wired to `doDecrypt`, not demonstrated |
+| Acquirer "Export all" denied | Implemented | Wired, not demonstrated |
+| Acquirer self-grant of read access pending quorum | Implemented (0 of 2 approvals) | Wired to the IGA change-request inbox, not demonstrated |
+| Three-seat quorum (company, custodian, ethics board) | Implemented (Quorum page, 2 of 3 to commit) | Setup script requests the seats; not demonstrated |
+| Researcher access approved by quorum | Planned | Planned |
+| Consent preferences enforced cryptographically | Planned | Planned |
+| AI research agent limited to approved scope | Planned | Planned |
 
 ## Limitations and open questions
 
@@ -387,6 +406,7 @@ We prefer to state these plainly:
 5. **Cross-user reading.** The field roles are named `selfencrypt` and `selfdecrypt`. We are confirming with Tide the recommended way for a quorum-approved researcher to read another user's record (for example a Forseti policy).
 6. **Simulated independence.** In the prototype, our team operates all three quorum seats. Real independence requires separate organisations. The prototype also runs on Tide's development network, whose 20 nodes are hosted in a single cloud environment.
 7. **Consent flags are informational.** In the prototype they are not yet bound cryptographically to access decisions.
+8. **The demo runs on simulated TideCloak.** The Tide development network failed during our build, so the recorded demo uses simulated mode. It enforces the same rules (role-gated, owner-bound encryption; 2-of-3 quorum for role grants), but its key is derived in the browser and its server trusts the persona name, so it shows the rules, not the custody guarantees. Those come only from real TideCloak.
 
 ## Roadmap
 
@@ -405,6 +425,7 @@ We prefer to state these plainly:
 - **TideCloak** for identity, field-level encryption and quorum governance.
 - **Next.js 14** web app using the `@tidecloak/nextjs` SDK (0.14.40) for sign-in, encryption and admin requests.
 - **Raziel**, Tide's MCP server, connected to our coding agent for integration guidance.
+- **Simulated TideCloak mode** behind the same `useTide()` interface, so the demo runs while the Tide development network is down ([integration plan](docs/tidecloak-integration-plan.md)).
 - **Synthetic data only.** No real genetic or personal data is used anywhere in this repository.
 
 <!-- TODO(team): add team member names, roles and campus. -->

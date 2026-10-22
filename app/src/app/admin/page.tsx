@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTideCloak } from "@tidecloak/nextjs";
+import { useTide } from "@/lib/tide";
 
 const TAG = "genome";
 const READ_ROLE = "_tide_genome.selfdecrypt";
@@ -21,7 +21,7 @@ type PendingRequest = {
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
 export default function AdminPage() {
-  const { authenticated, doDecrypt, getValueFromToken, AdminAPI } = useTideCloak();
+  const { authenticated, doDecrypt, getValueFromToken, AdminAPI } = useTide();
   const [exportStatus, setExportStatus] = useState<Status | null>(null);
   const [grantStatus, setGrantStatus] = useState<Status | null>(null);
   const [busy, setBusy] = useState(false);

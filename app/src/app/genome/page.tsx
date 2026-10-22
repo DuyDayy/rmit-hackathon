@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useTideCloak } from "@tidecloak/nextjs";
+import { useTide } from "@/lib/tide";
 import { MAYA_ID, SYNTHETIC_GENOME, type Genome } from "@/lib/syntheticGenome";
 
 const TAG = "genome";
 
 export default function GenomePage() {
-  const { authenticated, doEncrypt, doDecrypt } = useTideCloak();
+  const { authenticated, doEncrypt, doDecrypt } = useTide();
   const [status, setStatus] = useState<{ kind: "ok" | "denied"; text: string } | null>(null);
   const [genome, setGenome] = useState<Genome | null>(null);
   const [busy, setBusy] = useState(false);

@@ -17,7 +17,8 @@
 #
 #  Environment overrides: KC_USER, KC_PASSWORD, TIDECLOAK_LOCAL_URL,
 #  NEW_REALM_NAME, ENROLL_LEE=1 (lee is not in the demo by default),
-#  NO_OPEN=1 (print links instead of opening a browser).
+#  NO_OPEN=1 (print links instead of opening a browser), PROVISION_ATTEMPTS=4
+#  and RETRY_WAIT=30 (seconds) for retries when the Tide Fabric is failing.
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
@@ -131,7 +132,8 @@ ok "docker, curl, jq, node $(node -v), npm"
 
 # ═════════════════════════════════════════════════════════════════════════════
 step "1. TideCloak container"
-state="$(docker inspect -f '{{.State.Status}}' "${CONTAINER}" 2>/dev/null || echo missing)"
+state="$(docker inspect -f '{{.State.Status}}' "${CONTAINER}" 2>/dev/null | head -1 || true)"
+state="${state:-missing}"
 if [[ "${state}" == "running" ]]; then
   ok "container '${CONTAINER}' running"
 elif [[ "${STATUS_ONLY}" == "1" ]]; then
@@ -197,8 +199,8 @@ else
       curl -s -o /dev/null -X DELETE -H "Authorization: Bearer $(token)" "${BASE}"
       todo "deleted half-provisioned realm"
     fi
-    for attempt in 1 2 3 4; do
-      todo "provisioning (attempt ${attempt}), log: app/init/.tcinit.log"
+    for attempt in $(seq 1 "${PROVISION_ATTEMPTS:-4}"); do
+      todo "provisioning (attempt ${attempt}/${PROVISION_ATTEMPTS:-4}, $(date +%H:%M)), log: app/init/.tcinit.log"
       (cd "${APP_DIR}" && bash init/tcinit.sh > "${INIT_LOG}" 2>&1) &
       init_pid=$!
       wait_for_tcinit "${init_pid}"
@@ -207,7 +209,7 @@ else
       if grep -q "KEYGEN_FAILED\|setUpTideRealm failed" "${INIT_LOG}"; then
         todo "Tide Fabric error (temporary). Deleting the realm and retrying..."
         curl -s -o /dev/null -X DELETE -H "Authorization: Bearer $(token)" "${BASE}"
-        sleep 5
+        sleep "${RETRY_WAIT:-30}"
       else
         tail -20 "${INIT_LOG}" >&2; die "provisioning failed (see app/init/.tcinit.log)."
       fi
