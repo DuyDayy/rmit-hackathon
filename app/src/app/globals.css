@@ -1,0 +1,13 @@
+body { margin: 0; font-family: system-ui, sans-serif; font-size: 18px; color: #111; background: #fafafa; }
+.banner { background: #fff3cd; color: #664d03; text-align: center; padding: 6px; font-size: 14px; }
+nav { display: flex; gap: 16px; align-items: center; padding: 12px 24px; background: #fff; border-bottom: 1px solid #ddd; }
+nav .spacer { flex: 1; }
+main { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+button { font-size: 16px; padding: 8px 14px; border-radius: 6px; border: 1px solid #888; background: #fff; cursor: pointer; }
+button:disabled { opacity: 0.5; cursor: default; }
+table { border-collapse: collapse; margin-top: 12px; }
+td, th { border: 1px solid #ccc; padding: 6px 12px; text-align: left; }
+.ok { color: #0f5132; background: #d1e7dd; padding: 10px; border-radius: 6px; }
+.denied { color: #842029; background: #f8d7da; padding: 10px; border-radius: 6px; font-weight: 600; }
+.pending { color: #664d03; background: #fff3cd; padding: 10px; border-radius: 6px; font-weight: 600; }
+code { word-break: break-all; font-size: 13px; }

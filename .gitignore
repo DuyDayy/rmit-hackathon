@@ -49,3 +49,8 @@ challenge1/*.dryrun.ipynb
 
 # TideCloak dev server data (local only)
 .tidecloak-data/
+
+# Unsellable app: local ciphertext store and realm adapter (A6 output)
+app/data/
+app/tidecloak.json
+app/next-env.d.ts

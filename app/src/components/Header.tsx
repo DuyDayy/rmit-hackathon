@@ -1,0 +1,39 @@
+"use client";
+
+import Link from "next/link";
+import { useTideCloak } from "@tidecloak/nextjs";
+
+// Roles the demo cares about; shown so each persona's power is visible on video.
+const DEMO_ROLES = ["_tide_genome.selfencrypt", "_tide_genome.selfdecrypt"];
+
+export default function Header() {
+  const { authenticated, isInitializing, login, logout, getValueFromIdToken, hasRealmRole } = useTideCloak();
+
+  const username = authenticated ? getValueFromIdToken("preferred_username") : null;
+  const roles = authenticated ? DEMO_ROLES.filter((r) => hasRealmRole(r)) : [];
+
+  return (
+    <header>
+      <div className="banner">Synthetic data only. No real person or genome.</div>
+      <nav>
+        <strong>Unsellable</strong>
+        <Link href="/">Home</Link>
+        <Link href="/genome">My genome</Link>
+        <Link href="/admin">Admin</Link>
+        <span className="spacer" />
+        {isInitializing ? (
+          <span>…</span>
+        ) : authenticated ? (
+          <>
+            <span data-testid="user">
+              {username} · roles: {roles.length ? roles.join(", ") : "none"}
+            </span>
+            <button onClick={() => logout()}>Log out</button>
+          </>
+        ) : (
+          <button onClick={() => login()}>Log in</button>
+        )}
+      </nav>
+    </header>
+  );
+}
