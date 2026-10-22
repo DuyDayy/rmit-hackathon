@@ -32,44 +32,56 @@ Watch for: Maya seals and views her genome; the database holds only ciphertext; 
 
 ## Setup
 
-<!-- TODO(team): replace every step below with the exact commands your build uses, then run through it once on a clean machine. -->
+<!-- TODO(team): run through these steps once on a clean machine before submitting. -->
 
 ### Prerequisites
 
 | Tool | Version | Why |
 |---|---|---|
 | Docker | Recent stable | Runs the TideCloak development server |
-| Node.js | 18.18 or newer | Runs the Next.js app |
+| Node.js | 18.17 or newer | Required by Next.js 14 |
 | npm | Bundled with Node.js | Installs dependencies |
+| `jq` and `curl` | Any | Used by the realm setup script |
 | A modern browser | Chrome, Edge or Firefox | Decryption happens in the browser |
 
 ### 1. Start TideCloak (development mode)
 
+From the repository root:
+
 ```bash
 docker run -d --name tidecloak -p 8080:8080 \
+  -v "$PWD/.tidecloak-data:/opt/keycloak/data/h2" \
   -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
-  -e KC_BOOTSTRAP_ADMIN_PASSWORD=change-me \
+  -e KC_BOOTSTRAP_ADMIN_PASSWORD=password \
   tideorg/tidecloak-dev:latest
 ```
 
-Open `http://localhost:8080` and sign in to the admin console. These bootstrap credentials are for local development only.
+Wait until `http://localhost:8080` responds. These bootstrap credentials are for local development only; the setup script below expects `admin` / `password` (override with `KC_USER` and `KC_PASSWORD`).
 
-### 2. Configure the realm
+### 2. Create the `unsellable` realm
 
-Follow the [TideCloak Quickstart](https://docs.tide.org/get-started/Tidecloak%20Quickstart) (or ask Tide's MCP server in your coding agent) to:
+```bash
+cd app
+npm install
+npm run init
+```
 
-1. Activate the development licence and create a realm named `unsellable`.
-2. Register the web client used by the app.
-3. Create the field roles for genomes: `_tide_genome.selfencrypt` and `_tide_genome.selfdecrypt`.
-4. Create the demo users listed below and assign their roles.
-5. Nominate exactly **three** quorum administrators: `admin.company`, `custodian` and `ethics` (see [Governance design](#governance-design-who-sits-in-the-quorum)).
-6. Download the client adapter configuration and save it as `app/tidecloak.json` (not committed). In the client, allow redirect URI `http://localhost:3000/*` and web origin `http://localhost:3000`.
+The script ([`app/init/tcinit.sh`](app/init/tcinit.sh), adapted from the official `@tidecloak/create-nextjs` template) does the following:
+
+1. Creates the realm `unsellable` with web client `unsellable-web` (redirect URI `http://localhost:3000/*`, web origin `http://localhost:3000`), activates the development licence and enables Quorum-Enforced Governance.
+2. Creates the six demo users listed below. Only `maya` receives the genome roles `_tide_genome.selfencrypt` and `_tide_genome.selfdecrypt`.
+3. Prints an **ACTION REQUIRED** link. Open it and enrol a Tide account for `admin.company`, the first quorum administrator. The script waits, then finishes setup and writes the client adapter config to `app/tidecloak.json` (not committed).
+
+If the script stops with HTTP 500 `TIDE-IDPEXT-VENDOR-KEYGEN_FAILED`, the Tide Fabric had a temporary error. Delete the realm in the admin console and run `npm run init` again.
+
+After the script finishes, enrol the other demo users, then nominate `custodian` and `ethics` as quorum administrators in the Tide console at `http://localhost:8080/realms/unsellable/tide-console/`, so there are **three** in total (see [Governance design](#governance-design-who-sits-in-the-quorum)).
+
+<!-- TODO(team): add the exact console steps for enrolling users and nominating custodian and ethics once verified. -->
 
 ### 3. Run the app
 
 ```bash
 cd app
-npm install
 npm run dev
 ```
 
@@ -338,12 +350,13 @@ Consent flags are stored in plaintext in the prototype so the app can display th
 
 | Capability | Status |
 |---|---|
-| Sign-in for all six personas through TideCloak | Implemented |
-| Genome sealed with Hermetic E2EE; database stores ciphertext only | Implemented |
-| Participant views her own genome | Implemented |
-| Acquirer "Export all" denied | Implemented |
-| Acquirer self-grant of read access pending quorum | Implemented |
-| Three-seat quorum (company, custodian, ethics board) | Implemented |
+| Realm `unsellable` with six personas; genome roles held only by `maya` | Implemented (setup script) |
+| Sign-in for all six personas through TideCloak | In progress |
+| Genome sealed with Hermetic E2EE; database stores ciphertext only | In progress |
+| Participant views her own genome | In progress |
+| Acquirer "Export all" denied | In progress |
+| Acquirer self-grant of read access pending quorum | In progress |
+| Three-seat quorum (company, custodian, ethics board) | In progress |
 | Researcher access approved by quorum | Planned |
 | Consent preferences enforced cryptographically | Planned |
 | AI research agent limited to approved scope | Planned |

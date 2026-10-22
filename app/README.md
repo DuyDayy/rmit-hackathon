@@ -4,8 +4,7 @@ Next.js 14 frontend for Unsellable, using `@tidecloak/nextjs` 0.14.40.
 
 ## Run
 
-1. Put the client adapter exported from TideCloak (task A6) at `app/tidecloak.json`. It is not committed. Without it every page shows "TideCloak not configured".
-2. In the TideCloak client, allow redirect URI `http://localhost:3000/*` and web origin `http://localhost:3000`.
+1. Run `npm run init` (see the root README, Setup step 2). It creates the realm, the client `unsellable-web` with redirect URI `http://localhost:3000/*` and web origin `http://localhost:3000`, and the demo users, then writes the client adapter to `app/tidecloak.json`. That file is not committed. Without it every page shows "TideCloak not configured".
 3. Start the app:
 
 ```bash

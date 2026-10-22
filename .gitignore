@@ -53,4 +53,10 @@ challenge1/*.dryrun.ipynb
 # Unsellable app: local ciphertext store and realm adapter (A6 output)
 app/data/
 app/tidecloak.json
-app/next-env.d.ts
+
+# Next.js generated files
+next-env.d.ts
+*.tsbuildinfo
+
+# Temporary marker written by app/init/tcinit.sh while it runs
+app/init/.realm_name
