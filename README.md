@@ -38,7 +38,7 @@ npm install
 npm run dev:sim
 ```
 
-Open `http://localhost:3000` and click **Log in** to pick a persona. Each browser tab keeps its own persona, so open one tab per persona. In this mode TideCloak's sign-in, roles, quorum approvals and the Fabric's access checks are simulated behind the same interface the app uses with real TideCloak; a blue banner says so on every page. To start the demo over, stop the server and delete `app/data/`.
+Open `http://localhost:3000` and click **Log in** to pick a persona. Each browser tab keeps its own persona, so open one tab per persona. Or run `npm run demo -- --fresh` instead of `npm run dev:sim`: it starts the app with empty demo data and opens a Chrome window with five tabs already signed in (`maya`, `admin.acquirer`, `admin.company`, `custodian`, `ethics`). In this mode TideCloak's sign-in, roles, quorum approvals and the Fabric's access checks are simulated behind the same interface the app uses with real TideCloak; a blue banner says so on every page. To start the demo over, stop the server and delete `app/data/`.
 
 We added this mode because the Tide development network was failing on 22 Oct 2026 (realm license setup and Tide account creation returned errors). [docs/tidecloak-integration-plan.md](docs/tidecloak-integration-plan.md) maps each simulated piece to the TideCloak feature it stands in for. The steps below run the same app against real TideCloak.
 

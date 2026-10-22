@@ -94,7 +94,9 @@ export default function AdminPage() {
   return (
     <>
       <h1>Admin</h1>
+      <p>Full control of the company&apos;s servers and admin accounts. Can it read anyone&apos;s DNA?</p>
       <section>
+        <h3>Export every genome</h3>
         <button onClick={exportAll} disabled={busy}>Export all genomes</button>
         {exportStatus && <p className={exportStatus.kind}>{exportStatus.text}</p>}
         <p>
@@ -102,6 +104,7 @@ export default function AdminPage() {
         </p>
       </section>
       <section>
+        <h3>Give myself read access</h3>
         <button onClick={grantSelf} disabled={busy}>Grant myself genome read access</button>
         {grantStatus && <p className={grantStatus.kind}>{grantStatus.text}</p>}
       </section>

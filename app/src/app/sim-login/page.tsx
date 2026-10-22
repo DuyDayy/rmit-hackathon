@@ -2,18 +2,26 @@
 
 // Simulated TideCloak sign-in: pick a persona. With real TideCloak this is the Tide enclave
 // login (BYOiD), and no password is stored by the app or TideCloak.
-import { PERSONAS } from "@/lib/sim/personas";
+// /sim-login?as=<persona>&next=<path> signs in directly (used by `npm run demo` to open one tab per persona).
+import { useEffect } from "react";
+import { PERSONAS, findPersona } from "@/lib/sim/personas";
 import { simSignIn } from "@/lib/sim/SimTideCloakProvider";
 import { TIDE_MODE } from "@/lib/tide";
 
-export default function SimLogin() {
-  if (TIDE_MODE !== "simulated") return <p>Simulated sign-in is off. Run <code>npm run dev:sim</code>.</p>;
+const go = (username: string) => {
+  simSignIn(username);
+  const next = new URLSearchParams(window.location.search).get("next") || "/";
+  window.location.assign(next.startsWith("/") ? next : "/");
+};
 
-  const signIn = (username: string) => {
-    simSignIn(username);
-    const next = new URLSearchParams(window.location.search).get("next") || "/";
-    window.location.assign(next.startsWith("/") ? next : "/");
-  };
+export default function SimLogin() {
+  useEffect(() => {
+    if (TIDE_MODE !== "simulated") return;
+    const as = new URLSearchParams(window.location.search).get("as");
+    if (as && findPersona(as)) go(as);
+  }, []);
+
+  if (TIDE_MODE !== "simulated") return <p>Simulated sign-in is off. Run <code>npm run dev:sim</code>.</p>;
 
   return (
     <>
@@ -21,22 +29,15 @@ export default function SimLogin() {
       <p>
         Choose a persona. Each browser tab keeps its own session, so you can open one tab per persona.
       </p>
-      <table>
-        <tbody>
-          {PERSONAS.map((p) => (
-            <tr key={p.username}>
-              <td>
-                <button onClick={() => signIn(p.username)}>{p.username}</button>
-              </td>
-              <td>
-                <strong>{p.displayName}</strong>
-                <br />
-                {p.story}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="personas">
+        {PERSONAS.map((p) => (
+          <div key={p.username} className="persona">
+            <strong>{p.displayName}</strong>
+            <p>{p.story}</p>
+            <button onClick={() => go(p.username)}>{p.username}</button>
+          </div>
+        ))}
+      </div>
     </>
   );
 }

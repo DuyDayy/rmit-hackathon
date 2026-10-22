@@ -16,7 +16,7 @@ Four parts, as suggested by the organisers: Possibility, Constraint, Prototype, 
 ## Notes for recording
 
 - Recording in simulated mode (`npm run dev:sim`): keep the blue "Simulated TideCloak" banner visible, and say once, around 0:35, "TideCloak is simulated here because Tide's development network was down; the same code runs on real TideCloak." Open one browser tab per persona before recording (Log in → pick persona), so no sign-in happens on camera.
-- To record again from a clean state: stop the server, delete `app/data/`, start `npm run dev:sim` again.
+- Fastest setup: `cd app && npm run demo -- --fresh`. It clears the demo data, starts simulated mode and opens one Chrome window with five signed-in tabs, in recording order: maya, admin.acquirer, admin.company, custodian, ethics. To record again, press Ctrl+C, close that window and run it again.
 - Step 2 (consent toggle) is not in the app yet, so it is not in the script. Add it only if the team builds it.
 - With real TideCloak, steps 5–6 decisions are signed in the Tide console instead of the app's Quorum page; change the 1:25 narration to "in the Tide console".
 - Read the narration aloud with a timer before recording. If it runs over 2:00, cut the second sentence of the Constraint part first.

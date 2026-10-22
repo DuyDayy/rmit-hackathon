@@ -98,8 +98,8 @@ export default function QuorumPage() {
                   <td>
                     {cr.status === "PENDING" && (
                       <>
-                        <button onClick={() => decide(cr.id, "approve")}>Approve</button>{" "}
-                        <button onClick={() => decide(cr.id, "reject")}>Reject</button>
+                        <button className="approve" onClick={() => decide(cr.id, "approve")}>Approve</button>{" "}
+                        <button className="reject" onClick={() => decide(cr.id, "reject")}>Reject</button>
                       </>
                     )}
                   </td>

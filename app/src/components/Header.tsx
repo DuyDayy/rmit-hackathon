@@ -1,16 +1,32 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useTide, TIDE_MODE } from "@/lib/tide";
 
 // Roles the demo cares about; shown so each persona's power is visible on video.
 const DEMO_ROLES = ["_tide_genome.selfencrypt", "_tide_genome.selfdecrypt"];
 
+const LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/genome", label: "My genome" },
+  { href: "/admin", label: "Admin" },
+  { href: "/quorum", label: "Quorum" },
+  { href: "/database", label: "Database view" },
+];
+
 export default function Header() {
   const { authenticated, isInitializing, login, logout, getValueFromIdToken, hasRealmRole } = useTide();
+  const pathname = usePathname();
 
   const username = authenticated ? getValueFromIdToken("preferred_username") : null;
   const roles = authenticated ? DEMO_ROLES.filter((r) => hasRealmRole(r)) : [];
+
+  // Name the browser tab after the signed-in persona, so each tab is easy to find while demoing.
+  useEffect(() => {
+    document.title = username ? `${username} · Unsellable` : "Unsellable";
+  });
 
   return (
     <header>
@@ -21,19 +37,30 @@ export default function Header() {
         </div>
       )}
       <nav>
-        <strong>Unsellable</strong>
-        <Link href="/">Home</Link>
-        <Link href="/genome">My genome</Link>
-        <Link href="/admin">Admin</Link>
-        <Link href="/quorum">Quorum</Link>
-        <Link href="/database">Database view</Link>
+        <Link href="/" className="brand">
+          <span className="mark">🧬</span>Unsellable
+        </Link>
+        {LINKS.map((l) => (
+          <Link key={l.href} href={l.href} className={`navlink${pathname === l.href ? " active" : ""}`}>
+            {l.label}
+          </Link>
+        ))}
         <span className="spacer" />
         {isInitializing ? (
-          <span>…</span>
+          <span className="who">…</span>
         ) : authenticated ? (
           <>
-            <span data-testid="user">
-              {username} · roles: {roles.length ? roles.join(", ") : "none"}
+            <span data-testid="user" className="who">
+              <span className="name">{username}</span> · roles:{" "}
+              {roles.length ? (
+                roles.map((r) => (
+                  <span key={r} className="badge">
+                    {r}
+                  </span>
+                ))
+              ) : (
+                <span className="badge none">none</span>
+              )}
             </span>
             <button onClick={() => logout()}>Log out</button>
           </>

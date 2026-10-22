@@ -60,9 +60,13 @@ export default function GenomePage() {
   return (
     <>
       <h1>My genome</h1>
-      <button onClick={seal} disabled={busy}>Seal genome</button>{" "}
-      <button onClick={open} disabled={busy}>Open</button>
-      {status && <p className={status.kind}>{status.text}</p>}
+      <p>Your synthetic genome is sealed in this browser before it leaves. Only you can open it again.</p>
+      <section>
+        <div className="actions">
+          <button onClick={seal} disabled={busy}>Seal genome</button>
+          <button className="secondary" onClick={open} disabled={busy}>Open</button>
+        </div>
+        {status && <p className={status.kind}>{status.text}</p>}
       {genome && (
         <table>
           <thead>
@@ -75,6 +79,7 @@ export default function GenomePage() {
           </tbody>
         </table>
       )}
+      </section>
     </>
   );
 }

@@ -11,7 +11,8 @@
     "as": "bash init/open-as.sh",
     "dev:sim": "NEXT_PUBLIC_TIDE_MODE=simulated next dev -p 3000",
     "build:sim": "NEXT_PUBLIC_TIDE_MODE=simulated next build",
-    "start:sim": "NEXT_PUBLIC_TIDE_MODE=simulated next start -p 3000"
+    "start:sim": "NEXT_PUBLIC_TIDE_MODE=simulated next start -p 3000",
+    "demo": "bash init/demo-tabs.sh"
   },
   "dependencies": {
     "@tidecloak/nextjs": "0.14.40",
