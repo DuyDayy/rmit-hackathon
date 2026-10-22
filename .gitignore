@@ -46,3 +46,6 @@ build/
 challenge1/outputs/
 challenge1/outputs_notebook/
 challenge1/*.dryrun.ipynb
+
+# TideCloak dev server data (local only)
+.tidecloak-data/
