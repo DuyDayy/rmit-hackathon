@@ -8,6 +8,16 @@ const READ_ROLE = "_tide_genome.selfdecrypt";
 
 type Status = { kind: "ok" | "denied" | "pending"; text: string };
 
+// Shape of an entry from /admin/realms/{realm}/iga/change-requests (fields this page reads).
+type PendingRequest = {
+  id: string;
+  actionType: string;
+  entityId?: string;
+  rows?: unknown;
+  authorizationCount?: number;
+  threshold?: number;
+};
+
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
 export default function AdminPage() {
@@ -51,12 +61,29 @@ export default function AdminPage() {
       const userId = getValueFromToken("sub");
       const role = await AdminAPI.getRole(READ_ROLE);
       await AdminAPI.addUserRoles(userId, [role]);
-      const pending = [...(await AdminAPI.getUserChangeRequests()), ...(await AdminAPI.getRoleChangeRequests())];
-      setGrantStatus(
-        pending.length > 0
-          ? { kind: "pending", text: `Pending: ${pending.length} change request(s) awaiting quorum approval.` }
-          : { kind: "ok", text: "No pending request found. Check the quorum setup (task A5)." },
-      );
+      // The source of truth: did the role actually land on our account?
+      const held: { name: string }[] = (await AdminAPI.getUserRoles(userId)) ?? [];
+      if (held.some((r) => r.name === READ_ROLE)) {
+        setGrantStatus({ kind: "ok", text: "Granted immediately: quorum governance is not enforced. Check the quorum setup (task A5)." });
+        return;
+      }
+      // AdminAPI.getUserChangeRequests() calls the legacy tide-admin/change-set endpoints, which
+      // return 404 on current TideCloak, so read the IGA change-request inbox directly.
+      let approvals = "";
+      try {
+        const pending: PendingRequest[] =
+          (await AdminAPI.fetch(`/admin/realms/${AdminAPI.getRealm()}/iga/change-requests?status=PENDING`)) ?? [];
+        const mine = pending.find(
+          (cr) => cr.actionType === "GRANT_ROLES" && (cr.entityId === userId || JSON.stringify(cr.rows ?? "").includes(userId)),
+        );
+        if (mine) approvals = ` ${mine.authorizationCount ?? 0} of ${mine.threshold ?? "?"} approvals.`;
+      } catch {
+        // Reading the inbox may need more rights than this admin has; the role check above is enough.
+      }
+      setGrantStatus({
+        kind: "pending",
+        text: `Pending quorum approval.${approvals} The role is not granted until the custodian and ethics board decide.`,
+      });
     } catch (e) {
       setGrantStatus({ kind: "denied", text: `Request failed: ${message(e)}` });
     } finally {

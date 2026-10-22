@@ -266,7 +266,7 @@ sequenceDiagram
 | **Hermetic E2EE** | Sealing and opening genome fields | Plaintext exists only in the authorised user's browser; servers, admins, cloud providers and Tide cannot decrypt |
 | **Role-gated encrypt and decrypt** | `_tide_genome.selfencrypt` and `_tide_genome.selfdecrypt` | Encrypt and decrypt endpoints check for the matching role before running |
 | **Quorum-Enforced Governance** | Any change to who may read genomes | Granting these roles is a governed change that goes through quorum approval instead of applying immediately |
-| **Ineffable keys on the Fabric** | All cryptographic operations | Each key is split across 20 independently operated nodes; no single node, operator, admin or Tide holds a whole key |
+| **Ineffable keys on the Fabric** | All cryptographic operations | Each key is split across 20 nodes and any operation needs 14 of them (`thresholdT` 14 of `thresholdN` 20 in our realm's adapter config), so no single node, admin or server holds a whole key |
 | **Tamper-proof authorization** | Every request to the Fabric | Tokens are signed by a distributed key, so a compromised server cannot forge permissions |
 | **BYOiD authentication** | Sign-in for every persona | No password hash stored by the app or TideCloak |
 
@@ -366,7 +366,7 @@ Consent flags are stored in plaintext in the prototype so the app can display th
 | Capability | Status |
 |---|---|
 | Realm `unsellable` with six personas; genome roles held only by `maya` | Implemented (setup script) |
-| Sign-in for all six personas through TideCloak | In progress |
+| Sign-in through TideCloak for the five demo personas (`lee` is created but not used in the demo) | In progress |
 | Genome sealed with Hermetic E2EE; database stores ciphertext only | In progress |
 | Participant views her own genome | In progress |
 | Acquirer "Export all" denied | In progress |
@@ -385,7 +385,7 @@ We prefer to state these plainly:
 3. **Plaintext lives in the browser.** Any script running on an authorised user's page could read decrypted data. A production version needs a strict content security policy and no third-party trackers.
 4. **Off-boarding from Tide.** Tide documents a Ragnarok Protocol that lets a customer reconstruct and export its authority keys when leaving Tide. We have asked Tide who can trigger it and whether it requires quorum approval. If a company owner could trigger it alone, Unsellable's guarantee would weaken to "an acquirer cannot do this silently".
 5. **Cross-user reading.** The field roles are named `selfencrypt` and `selfdecrypt`. We are confirming with Tide the recommended way for a quorum-approved researcher to read another user's record (for example a Forseti policy).
-6. **Simulated independence.** In the prototype, our team operates all three quorum seats. Real independence requires separate organisations.
+6. **Simulated independence.** In the prototype, our team operates all three quorum seats. Real independence requires separate organisations. The prototype also runs on Tide's development network, whose 20 nodes are hosted in a single cloud environment.
 7. **Consent flags are informational.** In the prototype they are not yet bound cryptographically to access decisions.
 
 ## Roadmap

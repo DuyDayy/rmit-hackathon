@@ -52,7 +52,8 @@ export default function GenomePage() {
       if (!res.ok) throw new Error(res.status === 404 ? "nothing sealed yet" : `server ${res.status}`);
       const { genome: ciphertext } = await res.json();
       const [plaintext] = await doDecrypt([{ encrypted: ciphertext, tags: [TAG] }]);
-      setGenome(JSON.parse(plaintext));
+      // The SDK types allow string or bytes.
+      setGenome(JSON.parse(typeof plaintext === "string" ? plaintext : new TextDecoder().decode(plaintext)));
       setStatus({ kind: "ok", text: "Opened in your browser." });
     });
 

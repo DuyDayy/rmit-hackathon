@@ -63,3 +63,6 @@ app/init/.realm_name
 
 # Log written by app/init/setup-all.sh
 app/init/.tcinit.log
+
+# Local Tide account list for the demo personas (never commit)
+.tide-accounts.txt
