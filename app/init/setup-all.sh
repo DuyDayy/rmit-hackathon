@@ -54,19 +54,13 @@ die()  { printf '\n\033[31mERROR:\033[0m %s\n' "$*" >&2; exit 1; }
 
 need_cmd() { command -v "$1" >/dev/null 2>&1 || die "missing dependency: $1"; }
 
-# Open a URL for a persona in a fresh private window so sessions do not mix.
-open_private() {
-  local url="$1"
+# Open a URL in the persona's own Chrome profile (see open-as.sh). Profiles do
+# not share sessions, so no window has to be closed between personas.
+open_private() { # persona url
   if [[ "${NO_OPEN:-0}" == "1" ]]; then
-    echo "    ${url}"
-  elif [[ "$(uname)" == "Darwin" && -d "/Applications/Google Chrome.app" ]]; then
-    open -na "Google Chrome" --args --incognito "${url}"
-  elif [[ "$(uname)" == "Darwin" ]]; then
-    open "${url}"
-  elif command -v xdg-open >/dev/null 2>&1; then
-    xdg-open "${url}" >/dev/null 2>&1 &
+    echo "    $1: $2"
   else
-    echo "    Open this URL: ${url}"
+    bash "${SCRIPT_DIR}/open-as.sh" "$1" "$2"
   fi
 }
 
@@ -175,8 +169,8 @@ wait_for_tcinit() {
   while kill -0 "${pid}" 2>/dev/null; do
     if [[ "${opened}" == "0" ]] && realm_exists && [[ -n "$(user_id "${FIRST_ADMIN}")" ]] \
        && ! enrolled "${FIRST_ADMIN}" && grep -q "ACTION REQUIRED" "${INIT_LOG}" 2>/dev/null; then
-      todo "Create the Tide account for ${FIRST_ADMIN} in the browser window that just opened."
-      open_private "$(enroll_link "${FIRST_ADMIN}")"
+      todo "Create the Tide account for ${FIRST_ADMIN} in its own browser window (just opened)."
+      open_private "${FIRST_ADMIN}" "$(enroll_link "${FIRST_ADMIN}")"
       opened=1
     fi
     sleep 4
@@ -192,8 +186,8 @@ else
   if [[ -n "${running_pid}" ]]; then
     todo "a provisioning run is already in progress (pid ${running_pid}); waiting for it"
     if ! enrolled "${FIRST_ADMIN}"; then
-      todo "Create the Tide account for ${FIRST_ADMIN} in the browser window that just opened."
-      open_private "$(enroll_link "${FIRST_ADMIN}")"
+      todo "Create the Tide account for ${FIRST_ADMIN} in its own browser window (just opened)."
+      open_private "${FIRST_ADMIN}" "$(enroll_link "${FIRST_ADMIN}")"
     fi
     while kill -0 "${running_pid}" 2>/dev/null; do sleep 4; done
   else
@@ -229,13 +223,13 @@ step "4. Enroll demo personas (one Tide account each)"
 for u in ${PERSONAS}; do
   if enrolled "$u"; then ok "$u enrolled"; continue; fi
   if [[ "${STATUS_ONLY}" == "1" ]]; then todo "$u not enrolled"; continue; fi
-  todo "Create the Tide account for '$u' in the private window that just opened. Waiting..."
-  open_private "$(enroll_link "$u")"
+  todo "Create the Tide account for '$u' in its own browser window (just opened). Waiting..."
+  open_private "$u" "$(enroll_link "$u")"
   n=0
   until enrolled "$u"; do
     sleep 4; n=$((n + 1))
     # Links last an hour; send a new one every 15 minutes in case the tab was closed.
-    if (( n % 225 == 0 )); then todo "still waiting for $u, opening a new link"; open_private "$(enroll_link "$u")"; fi
+    if (( n % 225 == 0 )); then todo "still waiting for $u, opening a new link"; open_private "$u" "$(enroll_link "$u")"; fi
   done
   ok "$u enrolled"
 done
@@ -267,7 +261,7 @@ elif [[ "${STATUS_ONLY}" == "1" ]]; then
 else
   echo "${crs}" | sed 's/^/  • pending: /'
   todo "Sign in to the Tide console as ${FIRST_ADMIN}, then approve and commit every pending change request."
-  open_private "${CONSOLE_URL}"
+  open_private "${FIRST_ADMIN}" "${CONSOLE_URL}"
   until [[ -z "$(pending_crs)" ]]; do sleep 5; done
   ok "no pending change requests left"
 fi

@@ -52,7 +52,7 @@ npm install
 npm run setup
 ```
 
-[`app/init/setup-all.sh`](app/init/setup-all.sh) runs steps 1 and 2 below, then the parts that follow them. It is safe to re-run: each step checks what is already done and skips it. It opens a private browser window whenever a person is needed, and waits:
+[`app/init/setup-all.sh`](app/init/setup-all.sh) runs steps 1 and 2 below, then the parts that follow them. It is safe to re-run: each step checks what is already done and skips it. Whenever a person is needed it opens that persona's own Chrome profile, and waits. Profiles keep separate sessions, so nothing has to be closed between personas, and `npm run as -- <persona>` reopens the app as that persona later:
 
 - once per persona, to create that persona's Tide account (enrollment);
 - once for `admin.company`, to approve and commit the pending change requests in the Tide console. These give `custodian` and `ethics` their quorum seats and make `admin.acquirer` an app administrator without a quorum seat.
