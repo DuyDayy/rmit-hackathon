@@ -326,9 +326,9 @@ The challenge asks whether the app would work exactly the same with ordinary log
 
 ## Demo walkthrough
 
-Video: [`demo.mp4`](./demo.mp4) (two minutes).
+Video: [`demo.mp4`](./demo.mp4) (one minute, no narration, recorded in simulated mode).
 
-<!-- TODO(team): add timestamps once the video is recorded. -->
+Approximate timestamps: 0:00 Maya seals and opens her genome · 0:10 database view, ciphertext only · 0:20 acquirer export denied, self-grant pending (0 of 2) · 0:30 quorum votes · 0:40 request rejected · 0:50 acquirer still denied.
 
 | Step | Who | Action | Expected result |
 |---|---|---|---|

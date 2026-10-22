@@ -66,3 +66,6 @@ app/init/.tcinit.log
 
 # Local Tide account list for the demo personas (never commit)
 .tide-accounts.txt
+
+# Raw screen recording (demo.mp4 is the compressed copy that is committed)
+demo.mov

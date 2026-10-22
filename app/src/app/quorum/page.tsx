@@ -23,6 +23,7 @@ export default function QuorumPage() {
   const { authenticated, getValueFromToken, AdminAPI } = useTide();
   const [requests, setRequests] = useState<CR[] | null>(null);
   const [message, setMessage] = useState<{ kind: "ok" | "denied"; text: string } | null>(null);
+  const [busy, setBusy] = useState(false);
   const me: string | undefined = authenticated ? getValueFromToken("preferred_username") ?? getValueFromToken("sub") : undefined;
   const status = TIDE_MODE === "simulated" ? "ALL" : "PENDING";
 
@@ -36,12 +37,18 @@ export default function QuorumPage() {
   }, [AdminAPI, status]);
 
   useEffect(() => {
-    if (authenticated) load();
+    if (!authenticated) return;
+    load();
+    // Keep the inbox live, so a request made in another tab shows up without reloading.
+    const timer = setInterval(load, 3000);
+    return () => clearInterval(timer);
   }, [authenticated, load]);
 
   if (!authenticated) return <p>Log in as a quorum administrator: <code>admin.company</code>, <code>custodian</code> or <code>ethics</code>.</p>;
 
   async function decide(id: string, decision: "approve" | "reject") {
+    if (busy) return;
+    setBusy(true);
     setMessage(null);
     try {
       const cr: CR = await AdminAPI.fetch(`/admin/realms/${AdminAPI.getRealm()}/iga/change-requests/${id}/${decision}`, { method: "POST" });
@@ -49,7 +56,8 @@ export default function QuorumPage() {
     } catch (e) {
       setMessage({ kind: "denied", text: e instanceof Error ? e.message : String(e) });
     }
-    load();
+    await load();
+    setBusy(false);
   }
 
   return (
@@ -96,12 +104,16 @@ export default function QuorumPage() {
                 </td>
                 {TIDE_MODE === "simulated" && (
                   <td>
-                    {cr.status === "PENDING" && (
-                      <>
-                        <button className="approve" onClick={() => decide(cr.id, "approve")}>Approve</button>{" "}
-                        <button className="reject" onClick={() => decide(cr.id, "reject")}>Reject</button>
-                      </>
-                    )}
+                    {cr.status === "PENDING" && me && (cr.approvals ?? []).includes(me) ? (
+                      <span className="badge">You approved</span>
+                    ) : cr.status === "PENDING" && me && (cr.rejections ?? []).includes(me) ? (
+                      <span className="badge none">You rejected</span>
+                    ) : cr.status === "PENDING" ? (
+                      <div className="actions">
+                        <button className="approve" disabled={busy} onClick={() => decide(cr.id, "approve")}>Approve</button>
+                        <button className="reject" disabled={busy} onClick={() => decide(cr.id, "reject")}>Reject</button>
+                      </div>
+                    ) : null}
                   </td>
                 )}
               </tr>
