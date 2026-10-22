@@ -1,1 +1,12 @@
-# Add dependencies here
+# Launch Challenge 1 on Modal (training deps are installed inside the Modal image)
+modal
+pyyaml
+
+# Local training / debugging (python challenge1/kernel.py --config configs/c1_debug.yaml)
+# torch
+# transformers
+# sentencepiece
+# protobuf
+# scikit-learn
+# pandas
+# numpy

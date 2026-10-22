@@ -1,0 +1,10 @@
+# Local smoke test (CPU / Apple MPS): small model from the HF hub, few rows, 1 epoch.
+# python challenge1/kernel.py --config configs/c1_debug.yaml
+model_path: distilbert/distilbert-base-multilingual-cased
+max_rows: 600
+max_len: 128
+batch_size: 16
+grad_accum: 1
+epochs: 1
+lr: 5.0e-5
+fp16: false

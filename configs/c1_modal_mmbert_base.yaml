@@ -1,0 +1,12 @@
+# Modal run, faster backbone / second ensemble member.
+model_hint: mmbert-base
+max_len: 512
+batch_size: 32
+grad_accum: 1
+epochs: 4
+lr: 3.0e-5
+warmup_ratio: 0.1
+val_size: 0.15
+class_weight_power: 0.5
+fp16: true
+tune_bias: true
