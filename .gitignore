@@ -44,3 +44,5 @@ build/
 
 # Challenge outputs
 challenge1/outputs/
+challenge1/outputs_notebook/
+challenge1/*.dryrun.ipynb
