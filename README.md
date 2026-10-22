@@ -14,25 +14,21 @@ Genetic testing and biobanks power medical discovery, but participants must trus
 
 ### 2. Trust constraint insight
 
-In 2025, a court approved transferring bankrupt 23andMe's customer genetic data to its $305M buyer; 1.9 million people requested deletion. In 2026, UK Biobank paused research access after data released to researchers appeared for sale online. Whoever controls the company controls the keys, so people withdraw and custodians lock research down. Remove that single point of control and genetic data stays useful without being for sale.
+In 2025, a court approved transferring bankrupt 23andMe's customer genetic data to its $305M buyer; 1.9 million people requested deletion. In 2026, UK Biobank paused research access after researchers' data appeared for sale online. Whoever controls the company controls the keys, so people withdraw and custodians lock research down. Remove that single point of control and genetic data stays useful without being for sale.
 
 ### 3. Value & impact
 
-Participants can contribute DNA knowing an acquisition, rogue admin or breach cannot take it. Companies offer a verifiable guarantee instead of a privacy policy. Example: Maya's genome stays hers even after "Acquirer Corp" takes over every server.
+Participants can contribute DNA knowing an acquisition, rogue admin or breach cannot take it. Companies offer a verifiable guarantee instead of a privacy policy. Example: Maya's genome stays hers even after "Acquirer Corp" seizes every server.
 
 ### 4. Why TideCloak matters
 
-Genomes are sealed with TideCloak's Hermetic E2EE: plaintext only appears in an authorised user's browser, never on our server. Read access is granted only through quorum-enforced governance where independent custodians hold the majority, so an acquirer inheriting admin seats cannot grant itself access. With ordinary backend permissions, that admin could simply export everything.
+Genomes are sealed with TideCloak's Hermetic E2EE: plaintext only appears in an authorised user's browser, never on our server. Read access needs quorum approval, and independent custodians hold the majority, so an acquirer inheriting admin seats cannot grant itself access. With ordinary permissions, that admin could export everything.
 
 ### 5. Prototype & storytelling
 
-Watch for: Maya seals and views her genome; the database holds only ciphertext; Acquirer Corp's admin clicks "Export all" and is denied; granting itself read access stays pending until the custodian and ethics board decide.
-
-<!-- TODO(team): the overview above is under 300 words. Re-count after any edit. Only describe what the prototype actually does. -->
+Watch for: Maya seals and views her genome; the database holds only ciphertext; Acquirer Corp's admin is denied on "Export all"; its self-granted read access stays pending until the custodian and ethics board refuse. The demo simulates TideCloak because Tide's dev network was down.
 
 ## Setup
-
-<!-- TODO(team): run through these steps once on a clean machine before submitting. -->
 
 ### Run the demo now: simulated TideCloak (no Docker, no Tide account)
 
@@ -103,7 +99,7 @@ If the script stops with HTTP 500 `TIDE-IDPEXT-VENDOR-KEYGEN_FAILED`, the Tide F
 
 After the script finishes, enrol the other demo users, then nominate `custodian` and `ethics` as quorum administrators in the Tide console at `http://localhost:8080/realms/unsellable/tide-console/`, so there are **three** in total (see [Governance design](#governance-design-who-sits-in-the-quorum)).
 
-<!-- TODO(team): add the exact console steps for enrolling users and nominating custodian and ethics once verified. -->
+We could not verify the Tide console steps on 22 Oct 2026, because Tide account enrollment kept failing on the development network.
 
 ### 3. Run the app
 
@@ -163,6 +159,7 @@ The sections below go deeper than the 300-word overview, for judges and reviewer
 - [Limitations and open questions](#limitations-and-open-questions)
 - [Roadmap](#roadmap)
 - [How we built it](#how-we-built-it)
+- [Team](#team)
 - [References](#references)
 
 ## The problem in one picture
@@ -380,8 +377,6 @@ Consent flags are stored in plaintext in the prototype so the app can display th
 
 ## Prototype status
 
-<!-- TODO(team): update this table to match exactly what the demo shows. Judges compare it with the video. -->
-
 | Capability | Simulated mode (`npm run dev:sim`) | Real TideCloak |
 |---|---|---|
 | Realm `unsellable` with six personas; genome roles held only by `maya` | Same personas and roles | Setup script creates them; enrolling Tide accounts failed on 22 Oct (Tide dev network errors) |
@@ -424,11 +419,16 @@ We prefer to state these plainly:
 
 - **TideCloak** for identity, field-level encryption and quorum governance.
 - **Next.js 14** web app using the `@tidecloak/nextjs` SDK (0.14.40) for sign-in, encryption and admin requests.
-- **Raziel**, Tide's MCP server, connected to our coding agent for integration guidance.
+- **AI coding agent** for the integration, planned from the `@tidecloak/nextjs` SDK types because Tide's MCP server (Raziel) was not connected ([integration plan](docs/tidecloak-integration-plan.md)).
 - **Simulated TideCloak mode** behind the same `useTide()` interface, so the demo runs while the Tide development network is down ([integration plan](docs/tidecloak-integration-plan.md)).
 - **Synthetic data only.** No real genetic or personal data is used anywhere in this repository.
 
-<!-- TODO(team): add team member names, roles and campus. -->
+## Team
+
+- Nguyễn Nhất Duy
+- Nguyễn Thanh Nguyên
+- Nguyên Phương Quyên
+- Nguyễn Hùng Vương
 
 ## References
 
