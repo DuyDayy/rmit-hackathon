@@ -14,11 +14,11 @@ Genetic testing and biobanks power medical discovery, but participants must trus
 
 ### 2. Trust constraint insight
 
-In 2025, a court approved transferring bankrupt 23andMe's customer genetic data to its $305M buyer; 1.9 million people requested deletion. In 2026, UK Biobank paused worldwide research access after data released to researchers appeared for sale online. Whoever controls the company controls the keys, so people withdraw and custodians lock research down. Remove that single point of control and genetic data stays useful without being for sale.
+In 2025, a court approved transferring bankrupt 23andMe's customer genetic data to its $305M buyer; 1.9 million people requested deletion. In 2026, UK Biobank paused research access after data released to researchers appeared for sale online. Whoever controls the company controls the keys, so people withdraw and custodians lock research down. Remove that single point of control and genetic data stays useful without being for sale.
 
 ### 3. Value & impact
 
-Participants can contribute DNA knowing an acquisition, rogue admin or breach cannot take it. Companies offer a verifiable guarantee instead of a privacy policy. Example: Maya's genome stays hers even after "Acquirer Corp" takes over every server and admin account.
+Participants can contribute DNA knowing an acquisition, rogue admin or breach cannot take it. Companies offer a verifiable guarantee instead of a privacy policy. Example: Maya's genome stays hers even after "Acquirer Corp" takes over every server.
 
 ### 4. Why TideCloak matters
 
@@ -63,20 +63,19 @@ Follow the [TideCloak Quickstart](https://docs.tide.org/get-started/Tidecloak%20
 3. Create the field roles for genomes: `_tide_genome.selfencrypt` and `_tide_genome.selfdecrypt`.
 4. Create the demo users listed below and assign their roles.
 5. Nominate exactly **three** quorum administrators: `admin.company`, `custodian` and `ethics` (see [Governance design](#governance-design-who-sits-in-the-quorum)).
-6. Download the client adapter configuration and place it where the app expects it.
-
-<!-- TODO(team): confirm the adapter file name and location used by your template, and list any extra realm settings you changed. -->
+6. Download the client adapter configuration and save it as `app/tidecloak.json` (not committed). In the client, allow redirect URI `http://localhost:3000/*` and web origin `http://localhost:3000`.
 
 ### 3. Run the app
 
 ```bash
+cd app
 npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+Open `http://localhost:3000`. If the page says "TideCloak not configured", `app/tidecloak.json` is missing.
 
-<!-- TODO(team): if you added a seed script for synthetic data, document it here, e.g. `npm run seed`. -->
+There is no seed script: real ciphertext can only be produced in a signed-in browser. Sign in as `maya` and press "Seal genome" to create the first record. The server stores it in `app/data/genomes.json`.
 
 ### Demo accounts
 
@@ -142,18 +141,17 @@ Genetic data makes this especially serious:
 | When | What happened |
 |---|---|
 | 2023 | A months-long breach exposed personal and genetic data of 6.9 million customers. |
-| March 2025 | 23andMe filed for bankruptcy and put the company, including its DNA database of about 15 million people, up for sale. |
+| March 2025 | 23andMe filed for bankruptcy and put the company, including the genetic data of its 15 million customers, up for sale. |
 | By June 2025 | About 1.9 million people, roughly 15% of customers, asked for their genetic data to be deleted. |
-| May 2025 | Regeneron won the first auction with a $256M bid. |
-| June 2025 | Attorneys general from more than half of US states sued to block the sale of genetic data without customer consent. |
-| June 2025 | TTAM Research Institute, a nonprofit led by the former CEO, outbid Regeneron at $305M. |
-| July 2025 | The bankruptcy court approved the sale **and the transfer of customers' genetic data** to the buyer, overruling the states' objections. |
+| June 2025 | More than two dozen states sued 23andMe to challenge the sale of customers' private data. |
+| June 2025 | TTAM Research Institute, a nonprofit led by the former CEO, outbid Regeneron. |
+| July 2025 | The bankruptcy court approved the $305M purchase **and the transfer of customers' genetic data** to the buyer, overruling the states' objections. |
 
 Nothing here required an attacker. The data changed hands because the company did. Customers' only real option was to delete their data, which also removed it from research.
 
 ### UK Biobank: approved access, then a lockdown
 
-In April 2026, data from UK Biobank that had been made available to three research institutions was found listed for sale on a consumer marketplace. At least one dataset covered all 500,000 volunteers (de-identified). UK Biobank suspended all researcher access worldwide while it investigated.
+In April 2026, UK Biobank data held by three research institutions was offered for sale on a site owned by Alibaba. The de-identified data covered all 500,000 volunteers. UK Biobank temporarily paused researcher access while it investigated.
 
 ### The common pattern
 
@@ -234,23 +232,6 @@ sequenceDiagram
     Note over X: Owning the company does not mean owning the keys
 ```
 
-### Flow 3: A legitimate research request
-
-<!-- TODO(team): keep this flow only if the prototype implements researcher access. Otherwise move it to Roadmap. -->
-
-```mermaid
-sequenceDiagram
-    participant L as Researcher
-    participant T as TideCloak
-    participant Q as Custodian and ethics board
-    participant F as Tide Fabric
-    L->>T: Request access for cancer study
-    T->>Q: Change request needs quorum
-    Q-->>T: Approved by custodian and ethics board
-    L->>F: Open approved records
-    F-->>L: Plaintext in researcher browser only
-```
-
 ## TideCloak features we rely on
 
 | TideCloak feature | Where it appears in Unsellable | What it guarantees |
@@ -261,8 +242,6 @@ sequenceDiagram
 | **Ineffable keys on the Fabric** | All cryptographic operations | Each key is split across 20 independently operated nodes; no single node, operator, admin or Tide holds a whole key |
 | **Tamper-proof authorization** | Every request to the Fabric | Tokens are signed by a distributed key, so a compromised server cannot forge permissions |
 | **BYOiD authentication** | Sign-in for every persona | No password hash stored by the app or TideCloak |
-
-<!-- TODO(team): if you implemented a Forseti contract (for example ForbidSelfApproval or RequireDistinctOrgs on research access), add a row here and describe it. -->
 
 ## Governance design: who sits in the quorum
 
@@ -318,7 +297,6 @@ Video: [`demo.mp4`](./demo.mp4) (two minutes).
 | 4 | `admin.acquirer` | Clicks "Export all genomes" | **Denied** by the Fabric |
 | 5 | `admin.acquirer` | Tries to grant itself read access | **Pending**: 1 of 2 approvals |
 | 6 | `custodian`, `ethics` | Review the request | Rejected, so the acquirer still cannot read |
-| 7 | `lee` (if implemented) | Requests access for the cancer study; custodian and ethics approve | Lee can open only what was approved |
 
 The key interaction for judges is **steps 4 and 5**: full ownership of the company and its servers still does not translate into the power to read anyone's DNA.
 
@@ -386,6 +364,7 @@ We prefer to state these plainly:
 
 | Next step | Why it matters |
 |---|---|
+| Researcher access: Dr. Lee requests a study, the custodian and ethics board approve, and Lee opens only approved records in their browser | Shows the legitimate path that the quorum exists to allow, not only the one it blocks |
 | Forseti contract for research access with `ForbidSelfApproval` and `RequireDistinctOrgs` | Guarantees approvals come from different organisations and nobody approves their own request |
 | Purpose-bound access (consent purpose must match the study purpose) | Maya's "no commercial AI training" choice becomes enforceable, not just recorded |
 | Scoped AI research agent | An agent can analyse approved records but cannot export raw genomes, even under prompt injection |
@@ -396,7 +375,7 @@ We prefer to state these plainly:
 ## How we built it
 
 - **TideCloak** for identity, field-level encryption and quorum governance.
-- **Next.js** web app based on the TideCloak template.
+- **Next.js 14** web app using the `@tidecloak/nextjs` SDK (0.14.40) for sign-in, encryption and admin requests.
 - **Raziel**, Tide's MCP server, connected to our coding agent for integration guidance.
 - **Synthetic data only.** No real genetic or personal data is used anywhere in this repository.
 
@@ -405,13 +384,12 @@ We prefer to state these plainly:
 ## References
 
 1. TechCrunch, "23andMe says 15% of customers asked to delete their genetic data since bankruptcy" (June 2025). https://techcrunch.com/?p=3017740
-2. Business Insider, "Almost 2 million 23andMe users have asked the company to delete their data" (June 2025). https://www.businessinsider.nl/almost-2-million-23andme-users-have-asked-the-company-to-delete-their-data-in-the-last-2-months
-3. BioSpace, "Regeneron Backs Off 23andMe, Losing Bid to Former CEO" (2025). https://www.biospace.com/business/regeneron-backs-off-23andme-losing-bid-to-former-ceo
-4. Mealey's, "Bankruptcy Judge Approves $305 Million Purchase Of 23andMe And Data Transfer" (July 2025). https://www.mealeys.com/mealeys/articles/2362409
-5. NPR, "23andMe is filing for bankruptcy. Here's what it means for your genetic data" (March 2025). https://www.kpbs.org/news/science-technology/2025/03/24/23andme-is-filing-for-bankruptcy-heres-what-it-means-for-your-genetic-data
-6. Times Higher Education, "UK Biobank access suspended after major health data breach" (April 2026). https://www.timeshighereducation.com/node/742589
-7. TechRepublic, "Health Records of 500,000 UK Biobank Volunteers Listed Online in China" (April 2026). https://www.techrepublic.com/article/uk-biobank-data-500k-sale-china/
-8. TideCloak docs, "Hermetic End-to-End Encryption". https://docs.tide.org/Core-Concepts/hermetic-e2ee
-9. TideCloak docs, "Forseti Programmable Policy Engine". https://docs.tide.org/Core-Concepts/forseti-engine
-10. Tide, "How Tide Works". https://tide.org/howtideworks
-11. Tide, "UNLOCKED: Challenge 2 of the RMIT hackathon". https://tide.org/unlocked
+2. BioSpace, "Regeneron Backs Off 23andMe, Losing Bid to Former CEO" (2025). https://www.biospace.com/business/regeneron-backs-off-23andme-losing-bid-to-former-ceo
+3. Mealey's, "Bankruptcy Judge Approves $305 Million Purchase Of 23andMe And Data Transfer" (July 2025). https://www.mealeys.com/mealeys/articles/2362409
+4. NPR, "23andMe is filing for bankruptcy. Here's what it means for your genetic data" (March 2025). https://www.kpbs.org/news/science-technology/2025/03/24/23andme-is-filing-for-bankruptcy-heres-what-it-means-for-your-genetic-data
+5. Times Higher Education, "UK Biobank access suspended after major health data breach" (April 2026). https://www.timeshighereducation.com/node/742589
+6. TechRepublic, "Health Records of 500,000 UK Biobank Volunteers Listed Online in China" (April 2026). https://www.techrepublic.com/article/uk-biobank-data-500k-sale-china/
+7. TideCloak docs, "Hermetic End-to-End Encryption". https://docs.tide.org/Core-Concepts/hermetic-e2ee
+8. TideCloak docs, "Forseti Programmable Policy Engine". https://docs.tide.org/Core-Concepts/forseti-engine
+9. Tide, "How Tide Works". https://tide.org/howtideworks
+10. Tide, "UNLOCKED: Challenge 2 of the RMIT hackathon". https://tide.org/unlocked
