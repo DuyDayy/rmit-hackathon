@@ -1,5 +1,5 @@
 # Local smoke test (CPU / Apple MPS): small model from the HF hub, few rows, 1 epoch.
-# python challenge1/kernel.py --config configs/c1_debug.yaml
+# python challenge1/RMIT_SGS_Overfitters_C1.py --config configs/c1_debug.yaml
 model_path: distilbert/distilbert-base-multilingual-cased
 max_rows: 600
 max_len: 128

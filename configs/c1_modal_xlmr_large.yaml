@@ -1,4 +1,4 @@
-# Modal A100/H100 run: modal run challenge1/kernel.py --config configs/c1_modal_xlmr_large.yaml
+# Modal A100/H100 run: modal run challenge1/RMIT_SGS_Overfitters_C1.py --config configs/c1_modal_xlmr_large.yaml
 model_hint: xlm-roberta-large
 max_len: 512
 batch_size: 16
