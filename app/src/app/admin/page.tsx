@@ -70,6 +70,9 @@ export default function AdminPage() {
       <section>
         <button onClick={exportAll} disabled={busy}>Export all genomes</button>
         {exportStatus && <p className={exportStatus.kind}>{exportStatus.text}</p>}
+        <p>
+          The raw file can still be <a href="/api/export-all">downloaded</a>. It contains ciphertext only.
+        </p>
       </section>
       <section>
         <button onClick={grantSelf} disabled={busy}>Grant myself genome read access</button>

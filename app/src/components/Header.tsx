@@ -20,6 +20,7 @@ export default function Header() {
         <Link href="/">Home</Link>
         <Link href="/genome">My genome</Link>
         <Link href="/admin">Admin</Link>
+        <Link href="/database">Database view</Link>
         <span className="spacer" />
         {isInitializing ? (
           <span>…</span>

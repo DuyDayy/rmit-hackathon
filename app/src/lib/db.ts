@@ -10,7 +10,16 @@ export type ParticipantRecord = {
   updatedAt: string;
 };
 
-const DB_PATH = path.resolve(process.cwd(), process.env.GENOME_DB_PATH ?? "data/genomes.json");
+export const DB_PATH = path.resolve(process.cwd(), process.env.GENOME_DB_PATH ?? "data/genomes.json");
+
+// Raw file contents exactly as on disk, for the Database view.
+export async function readRaw(): Promise<string | null> {
+  try {
+    return await fs.readFile(DB_PATH, "utf8");
+  } catch {
+    return null;
+  }
+}
 
 export async function readAll(): Promise<ParticipantRecord[]> {
   try {

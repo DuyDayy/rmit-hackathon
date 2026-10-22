@@ -11,3 +11,4 @@ td, th { border: 1px solid #ccc; padding: 6px 12px; text-align: left; }
 .denied { color: #842029; background: #f8d7da; padding: 10px; border-radius: 6px; font-weight: 600; }
 .pending { color: #664d03; background: #fff3cd; padding: 10px; border-radius: 6px; font-weight: 600; }
 code { word-break: break-all; font-size: 13px; }
+pre.raw { background: #111; color: #9fef00; padding: 16px; border-radius: 6px; font-size: 13px; white-space: pre-wrap; word-break: break-all; }
