@@ -44,6 +44,21 @@ Watch for: Maya seals and views her genome; the database holds only ciphertext; 
 | `jq` and `curl` | Any | Used by the realm setup script |
 | A modern browser | Chrome, Edge or Firefox | Decryption happens in the browser |
 
+### Quick start: one command
+
+```bash
+cd app
+npm install
+npm run setup
+```
+
+[`app/init/setup-all.sh`](app/init/setup-all.sh) runs steps 1 and 2 below, then the parts that follow them. It is safe to re-run: each step checks what is already done and skips it. It opens a private browser window whenever a person is needed, and waits:
+
+- once per persona, to create that persona's Tide account (enrollment);
+- once for `admin.company`, to approve and commit the pending change requests in the Tide console. These give `custodian` and `ethics` their quorum seats and make `admin.acquirer` an app administrator without a quorum seat.
+
+`npm run setup -- --status` shows what is done without changing anything. The steps below describe the same setup by hand.
+
 ### 1. Start TideCloak (development mode)
 
 From the repository root:

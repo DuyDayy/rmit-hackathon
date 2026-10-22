@@ -60,3 +60,6 @@ next-env.d.ts
 
 # Temporary marker written by app/init/tcinit.sh while it runs
 app/init/.realm_name
+
+# Log written by app/init/setup-all.sh
+app/init/.tcinit.log

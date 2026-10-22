@@ -191,7 +191,6 @@ else
   running_pid="$(pgrep -f "init/tcinit.sh" | head -1 || true)"
   if [[ -n "${running_pid}" ]]; then
     todo "a provisioning run is already in progress (pid ${running_pid}); waiting for it"
-    INIT_LOG=/dev/null
     if ! enrolled "${FIRST_ADMIN}"; then
       todo "Create the Tide account for ${FIRST_ADMIN} in the browser window that just opened."
       open_private "$(enroll_link "${FIRST_ADMIN}")"
@@ -207,8 +206,9 @@ else
     for attempt in 1 2 3 4; do
       todo "provisioning (attempt ${attempt}), log: app/init/.tcinit.log"
       (cd "${APP_DIR}" && bash init/tcinit.sh > "${INIT_LOG}" 2>&1) &
-      wait_for_tcinit $!
-      wait $! 2>/dev/null && break || true
+      init_pid=$!
+      wait_for_tcinit "${init_pid}"
+      if wait "${init_pid}"; then break; fi
       adapter_ready && break
       if grep -q "KEYGEN_FAILED\|setUpTideRealm failed" "${INIT_LOG}"; then
         todo "Tide Fabric error (temporary). Deleting the realm and retrying..."
